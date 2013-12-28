@@ -1,6 +1,19 @@
 Readme
 ================================
 
+Overview
+-------------------------
+The **mechanical-bird** is a bot that follows this algorithm:
+
+1. Randomly choose a string from a hard-coded list
+2. Search on www.bing.com for the chosen string
+3. Randomly choose one link from the result set
+4. Open the website
+5. Randomly choose one sentence from this website
+6. Tweet the sentece
+7. Start again with step 2 using the tweeted sentence after a random delay
+
+
 Usage
 -------------------------
 1. Clone the project:
