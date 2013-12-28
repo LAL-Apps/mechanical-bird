@@ -7,44 +7,79 @@ var logger = require('logger')
   , util = require('util');
 
 
-//config
+/*
+ * ------------------------------
+ *      Configuration
+ * ------------------------------
+ */
+
+/** Twitter configuration */
 var T = new twit({
-    consumer_key:         '...'
-  , consumer_secret:      '...'
-  , access_token:         '...'
-  , access_token_secret:  '...'
+    consumer_key:         '...'//put your consumer_key here
+  , consumer_secret:      '...'//put your consumer_secret here
+  , access_token:         '...'//put your access_token here
+  , access_token_secret:  '...'//put your access_token_secret here
 })
 
+/** 
+ * Initial query. One of the words will be chosen randomly in the beginning
+ * and when ever there is reset because bing did not return any search
+ * results.
+ */
 var initQuery = ['there is no place like home','may the force be with you',
   'not all who wander are lost','4chan','urban dictionary best words'];
 
-/** Minimum number of links on a site to go to a sub site */
-var requiredSubLinks = 5;
-
-var useSubSites = false;
-
-var aggressiveMode = false;
-
+/** The minimum delay between sending tweets */
 var minDelay = 2 * 60 * 60 * 1000;
+/** The maximum delay between sending tweets */
 var maxDelay = 12 * 60 * 60 * 1000;
 
-logger.setShowDebug(false);//show debug messages
 
-//global variables
+/** 
+ * Set this to true so the program does not take the text directly from the
+ * found site through the bing search but scans this site for links and chooses
+ * one of the links randomly
+ */
+var useSubSites = false;
+/** 
+ * Minimum number of links on a site to go to a sub site. If there are less 
+ * links on the site the first page is used.
+ */
+var requiredSubLinks = 5;
 
+/** Set this to true to send all tweets in uppercase */
+var aggressiveMode = false;
+
+/** Set this to true to log debug messages to the console */
+logger.setShowDebug(false);
+
+
+
+/*
+ * ------------------------------
+ *      Global Variables
+ * ------------------------------
+ */
+
+/** Delimeters to find the beginning or end of a sentence */
 var sentenceDelimeters = ['"','.','!','?'];
-
+/** Pages that should not be opened */
 var pageBlacklist = ['facebook','twitter','google','amazon', 'flickr'];
-
+/** If a URL ends with one of these files do not load it */
 var fileEndingsBlacklist = ['.jpg','.png','.gif','.pdf','.doc'];
-
+/** Global variable to store the last used query */
 var query = initQuery;
-
+/** Store the last used page to visit pages twice in a row */
 var lastUsedSite = '';
 
 
-// Utility function that downloads a URL and invokes
-// callback with the data.
+/*
+ * ------------------------------
+ *      Utillity Functions
+ * ------------------------------
+ */
+
+/** Download a website and return the HTML */
 function download(url, callback) {
   http.get(url, function(res) {
     res.setEncoding(encoding='utf8');
@@ -60,10 +95,12 @@ function download(url, callback) {
   });
 }
 
+/** Determine if a string ends with the specified suffix */
 function endsWith(str, suffix) {
     return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
 
+/** Filter function for links */
 function linkFilter(element){
   if (element){
     if (typeof element == 'undefined') return false;
@@ -82,6 +119,15 @@ function linkFilter(element){
 }
 
 
+/*
+ * ------------------------------
+ *      Tweet Loop Functions
+ * ------------------------------
+ */
+
+/** 
+ * main function that starts the process 
+ */
 function main(){
   if (query === null){
     random.getRandomInt(0,initQuery.length-1,function(err,value){
@@ -286,6 +332,14 @@ function sendTweet(text){
   });
 }
 
+
+/*
+ * ------------------------------
+ *      Start the web server
+ *      and the tweet loop
+ * ------------------------------
+ */
+
 //some server stuff in case anybody visits the server
 var app = express();
 
@@ -297,7 +351,7 @@ app.get('/', function(req, res) {
 
 //start the tweet loop
 main();
-
+//and the server
 app.listen(process.env.VCAP_APP_PORT || 3000);
 
 logger.i('Mechanical Hummingbird started');
